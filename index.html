@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KIS-Dashboard COPD-Ketenzorg</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #172033;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      background: #1d4ed8;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover { background: #173fae; }
+
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: linear-gradient(135deg, #eef4ff, #f8fafc);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 540px;
+      background: white;
+      padding: 34px;
+      border-radius: 28px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+      border: 1px solid #e2e8f0;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      background: #1d4ed8;
+      color: white;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    h1, h2, h3 { margin-top: 0; }
+
+    .login-card h1 {
+      font-size: 34px;
+      margin-bottom: 8px;
+    }
+
+    .muted {
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    label {
+      font-weight: 700;
+      color: #334155;
+      font-size: 14px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: white;
+    }
+
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 400;
+      color: #475569;
+    }
+
+    .remember input {
+      width: auto;
+    }
+
+    .demo-box {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #eef4ff;
+      color: #1e3a8a;
+      line-height: 1.6;
+    }
+
+    .error {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      background: #fee2e2;
+      color: #991b1b;
+      border-radius: 12px;
+    }
+
+    .app {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 290px;
+      background: #0f172a;
+      color: white;
+      padding: 28px 18px;
+      flex-shrink: 0;
+    }
+
+    .sidebar h2 {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+
+    .sidebar p {
+      color: #cbd5e1;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .sidebar button, .sidebar select {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .sidebar button {
+      background: #243044;
+      text-align: left;
+    }
+
+    .sidebar button:hover {
+      background: #334155;
+    }
+
+    .sidebar button.active {
+      background: #1d4ed8;
+    }
+
+    .sidebar .logout {
+      background: #7f1d1d;
+      margin-top: 20px;
+    }
+
+    .small-label {
+      display: block;
+      margin: 18px 0 8px;
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+
+    .content {
+      flex: 1;
+      padding: 32px;
+      overflow-x: auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .topbar h1 {
+      font-size: 32px;
+      margin-bottom: 6px;
+    }
+
+    .badge {
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .patient-card {
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      margin-bottom: 18px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .alert {
+      background: #fef3c7;
+      color: #78350f;
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 22px;
+      border: 1px solid #fde68a;
+    }
+
+    .panel {
+      background: white;
+      padding: 26px;
+      border-radius: 22px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+      margin-bottom: 22px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      margin-top: 18px;
+    }
+
+    .tile {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 18px;
+      border-radius: 16px;
+    }
+
+    .tile h3 {
+      margin-bottom: 8px;
+    }
+
+    .tile p {
+      margin: 0;
+      color: #475569;
+    }
+
+    .list {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .row, .message, .task {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 16px;
+      border-radius: 14px;
+    }
+
+    .message p, .task p {
+      margin: 6px 0 0;
+      color: #64748b;
+    }
+
+    .task {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .task button {
+      width: auto;
+      white-space: nowrap;
+    }
+
+    textarea {
+      min-height: 110px;
+      margin: 12px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 15px;
+    }
+
+    th {
+      text-align: left;
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    th, td {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 14px;
+      vertical-align: top;
+    }
+
+    td:first-child {
+      min-width: 150px;
+    }
+
+    @media (max-width: 850px) {
+      .app { flex-direction: column; }
+      .sidebar { width: 100%; }
+      .topbar { flex-direction: column; align-items: flex-start; }
+      .task { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="login-page" id="loginPage">
+    <section class="login-card">
+      <div class="logo">KIS</div>
+      <h1>KIS-Dashboard<br />COPD-Ketenzorg</h1>
+      <p class="muted">
+        Log in als stakeholder. De huisarts is één van de stakeholders, maar heeft in deze demo bredere inzage en meer functies dan de overige disciplines.
+      </p>
+
+      <form id="loginForm">
+        <label>Gebruikersnaam</label>
+        <input id="username" placeholder="Bijvoorbeeld: huisarts" />
+
+        <label>Stakeholderrol</label>
+        <select id="roleSelect">
+          <option value="huisarts">Huisarts — brede inzage en extra functies</option>
+          <option value="longzorg">Longzorg — disciplinegebonden toegang</option>
+          <option value="fysiotherapie">Fysiotherapie — disciplinegebonden toegang</option>
+          <option value="dietetiek">Diëtetiek — disciplinegebonden toegang</option>
+          <option value="psychologie">Psychologie — disciplinegebonden toegang</option>
+        </select>
+
+        <label>Wachtwoord</label>
+        <input id="password" type="password" value="demo123" />
+
+        <label class="remember">
+          <input type="checkbox" id="remember" />
+          Ingelogd blijven in deze browser
+          <span class="badge">Demo</span>
+        </label>
+
+        <button type="submit">Inloggen</button>
+      </form>
+
+      <div class="error" id="loginError">
+        Onjuiste combinatie. Gebruik een demo-gebruikersnaam of kies een stakeholderrol. Wachtwoord: demo123.
+      </div>
+
+      <div class="demo-box">
+        <strong>Demo-logins:</strong><br />
+        huisarts — brede inzage en extra functies<br />
+        longzorg, fysiotherapie, dietetiek, psychologie — disciplinegebonden toegang<br />
+        Wachtwoord: demo123<br /><br />
+        <strong>Tip:</strong> laat het veld gebruikersnaam leeg en kies een stakeholderrol om het verschil goed te testen.
+      </div>
+    </section>
+  </main>
+
+  <main class="app" id="app">
+    <aside class="sidebar">
+      <h2>KIS</h2>
+      <p>
+        <strong id="sideRole">Huisarts</strong><br />
+        <span id="sideAccess">Brede inzage</span>
+      </p>
+
+      <label class="small-label" id="disciplineLabel">Discipline</label>
+      <select id="disciplineSelect"></select>
+
+      <button data-tab="overzicht" class="active">Dashboard</button>
+      <button data-tab="gordon">Gordon-opzet</button>
+      <button data-tab="geschiedenis">Geschiedenis</button>
+      <button data-tab="communicatie">Communicatie</button>
+      <button data-tab="taken">Taken</button>
+      <button data-tab="ideeen">Ideeënbox</button>
+      <button data-tab="wetgeving">Wetgeving/privacy</button>
+      <button data-tab="behoeften">Behoeften</button>
+
+      <button class="logout" id="logoutBtn">Uitloggen</button>
+    </aside>
+
+    <section class="content">
+      <header class="topbar">
+        <div>
+          <h1>KIS-Dashboard COPD-Ketenzorg</h1>
+          <p class="muted" id="loginStatus">Ingelogd als Dr. J. Visser — Huisarts</p>
+        </div>
+        <span class="badge">Demo-omgeving</span>
+      </header>
+
+      <section class="patient-card">
+        <div><strong>Patiënt:</strong> de Wit, A. (fictief)</div>
+        <div><strong>♂ 68 jaar</strong></div>
+        <div><strong>BSN:</strong> 999-DEMO</div>
+        <div><strong>Diagnose:</strong> COPD GOLD III</div>
+        <div><strong>Allergie:</strong> penicilline</div>
+      </section>
+
+      <section class="alert">
+        ⚠ <strong>Hoog risico exacerbatie:</strong> FEV1 42%, SpO₂ 91%, 3 exacerbaties afgelopen jaar en recent gewichtsverlies.
+      </section>
+
+      <div id="mainPanel"></div>
+    </section>
+  </main>
+
+  <script>
+    const users = {
+      huisarts: {
+        password: "demo123",
+        name: "Dr. J. Visser",
+        role: "Huisarts",
+        access: "Brede inzage en extra functies",
+        discipline: "huisarts",
+        tabs: ["overzicht", "gordon", "geschiedenis", "communicatie", "taken", "ideeen", "wetgeving", "behoeften"]
+      },
+      longzorg: {
+        password: "demo123",
+        name: "Longzorg",
+        role: "Longzorg",
+        access: "Disciplinegebonden toegang",
+        discipline: "longzorg",
+        tabs: ["overzicht", "geschiedenis", "communicatie", "wetgeving"]
+      },
+      fysiotherapie: {
+        password: "demo123",
+        name: "Fysiotherapie",
+        role: "Fysiotherapie",
+        access: "Disciplinegebonden toegang",
+        discipline: "fysiotherapie",
+        tabs: ["overzicht", "geschiedenis", "communicatie", "wetgeving"]
+      },
+      dietetiek: {
+        password: "demo123",
+        name: "Diëtiek",
+        role: "Diëtiek",
+        access: "Disciplinegebonden toegang",
+        discipline: "dietetiek",
+        tabs: ["overzicht", "geschiedenis", "communicatie", "wetgeving"]
+      },
+      psychologie: {
+        password: "demo123",
+        name: "Psychologie",
+        role: "Psychologie",
+        access: "Disciplinegebonden toegang",
+        discipline: "psychologie",
+        tabs: ["overzicht", "geschiedenis", "communicatie", "wetgeving"]
+      }
+    };
+
+    const disciplines = {
+      huisarts: {
+        label: "Huisarts",
+        role: "Signalering, verwijzing en follow-up in de eerste lijn",
+        cards: [
+          ["FEV1", "42%"],
+          ["SpO₂", "91%"],
+          ["Exacerbaties", "3 afgelopen jaar"],
+          ["Overdracht", "Terugkoppeling longarts zichtbaar"]
+        ],
+        history: [
+          "Controle na exacerbatie — 20 maart 2025",
+          "Doorverwijzing longarts vastgelegd — 8 september 2024",
+          "Jaarcontrole ketenzorg COPD — 15 januari 2025"
+        ]
+      },
+      longzorg: {
+        label: "Longzorg",
+        role: "Diagnose, stadiëring en specialistisch behandeladvies",
+        cards: [
+          ["FEV1", "42%"],
+          ["SpO₂", "91%"],
+          ["Exacerbaties", "3 afgelopen jaar"],
+          ["Behandeladvies", "Herbeoordeling gewenst"]
+        ],
+        history: [
+          "Diagnose COPD GOLD III gesteld — 8 september 2024",
+          "Spirometrie: FEV1 42% — 12 februari 2025",
+          "Exacerbatie behandeld — 14 maart 2025"
+        ]
+      },
+      fysiotherapie: {
+        label: "Fysiotherapie",
+        role: "Longrevalidatie, belastbaarheid en bewegen",
+        cards: [
+          ["6-minuten wandeltest", "210 meter"],
+          ["MRC-score", "3/5"],
+          ["Beweegdoel", "Veilig opbouwen"],
+          ["Status", "Longrevalidatie actief"]
+        ],
+        history: [
+          "Start longrevalidatie — 5 januari 2025",
+          "Baseline 6MWT: 250 meter — 1 februari 2025",
+          "Voortgang: 210 meter — 12 mei 2025"
+        ]
+      },
+      dietetiek: {
+        label: "Diëtiek",
+        role: "Voedingstoestand en gewichtsverlies",
+        cards: [
+          ["Gewicht", "71 kg"],
+          ["Gewichtsverlies", "4 kg in 6 weken"],
+          ["BMI", "21,4"],
+          ["Advies", "Intake diëtiek plannen"]
+        ],
+        history: [
+          "Baseline gewicht: 75 kg — 1 december 2024",
+          "Gewicht 73 kg — 1 februari 2025",
+          "Verwijzing diëtiek aangevraagd — 12 mei 2025"
+        ]
+      },
+      psychologie: {
+        label: "Psychologie",
+        role: "Coping, angst en psychosociale ondersteuning",
+        cards: [
+          ["Coping", "Matig"],
+          ["Angst", "Aanwezig bij benauwdheid"],
+          ["Zelfmanagement", "Ondersteuning gewenst"],
+          ["Mantelzorg", "Aanwezig"]
+        ],
+        history: [
+          "Mantelzorger betrokken — 15 januari 2025",
+          "Stress en coping kwetsbaar gescoord — 1 maart 2025",
+          "Angst voor benauwdheid besproken — 12 mei 2025"
+        ]
+      }
+    };
+
+    const gordon = [
+      ["Gezondheidsbeleving", "Therapietrouw, rookhistorie en omgaan met COPD."],
+      ["Voeding en metabolisme", "Gewichtsverlies en voedingsstatus vragen aandacht."],
+      ["Uitscheiding", "Geen bijzonderheden in deze casus."],
+      ["Activiteit en beweging", "Benauwdheid en beperkte inspanningstolerantie."],
+      ["Slaap en rust", "Mogelijke nachtelijke benauwdheid."],
+      ["Cognitie en waarneming", "Geen cognitieve beperkingen bekend."],
+      ["Zelfbeleving", "Angst voor benauwdheid aanwezig."],
+      ["Rollen en relaties", "Mantelzorger is betrokken."],
+      ["Seksualiteit en reproductie", "Geen actuele hulpvraag."],
+      ["Stress en coping", "Coping vraagt begeleiding."],
+      ["Waarden en levensovertuiging", "Geen bekende belemmeringen."]
+    ];
+
+    const laws = [
+      ["AVG", "Medische informatie is vertrouwelijk. Alleen zorgverleners met een relevante functie mogen noodzakelijke patiëntgegevens zien.", "Rolgebaseerde accounts, discipline-specifieke schermen en privacy-informatie in de interface."],
+      ["DPIA", "Voor gebruik moet worden bekeken welke privacyrisico’s ontstaan bij verwerking van patiëntgegevens.", "DPIA opnemen als voorwaarde vóór ingebruikname van het dashboard."],
+      ["NEN 7510", "Richt zich op informatiebeveiliging in de zorg.", "Verplicht inloggen, autorisaties en afschermen van informatie per stakeholdergroep."],
+      ["NEN 7512", "Richt zich op veilige gegevensuitwisseling tussen zorgpartijen.", "Berichten en gegevensuitwisseling alleen tussen betrokken zorgverleners."],
+      ["NEN 7513", "Richt zich op logging: wie heeft gegevens ingezien, toegevoegd of aangepast.", "Zichtbaarheid van berichten, acties en taken; in een vervolgversie automatische logging uitbreiden."],
+      ["HL7/FHIR", "Standaarden voor digitale gegevensuitwisseling tussen HIS, KIS, EPD en andere zorgsystemen.", "Conceptueel verwerkt via berichten, acties en disciplinegerichte informatie; echte implementatie vraagt technische koppelingen."]
+    ];
+
+    const needs = [
+      ["Huisarts", "Klachten, GOLD-classificatie, behandeling, signalen van verslechtering en overdracht.", "Uitleg over dashboard, alarmering, taaktoewijzing en terugkoppeling."],
+      ["Praktijkondersteuner huisartsenzorg", "Monitoringsgegevens, inhalatie-instructie, zelfmanagement en follow-up.", "Registreren van metingen, signaleren van afwijkingen en veilig delen van informatie."],
+      ["Longarts", "Verwijsinformatie, diagnostiek, voorgeschiedenis en longfunctiegegevens.", "Raadplegen van keteninformatie, terugkoppelen van behandeladvies en specialistische adviezen verwerken."],
+      ["Verpleegkundig specialist", "Zorgplan, taakverdeling, voortgang en signalen vanuit meerdere disciplines.", "Taken coördineren, zorgplan aanpassen en overdrachtsmomenten bewaken."],
+      ["Fysiotherapeut", "Behandeldoelen, inspanningstolerantie en relevante medische voorgeschiedenis.", "Discipline-specifieke inzage, voortgang rapporteren en communiceren met het zorgteam."],
+      ["Apotheker", "Medicatieoverzicht, therapietrouw, inhalatiegebruik en medicatiewijzigingen.", "Medicatieinformatie raadplegen, wijzigingen terugkoppelen en waarschuwingen opvolgen."],
+      ["Afdelingshoofd", "Gebruik, borging, werkdruk, privacy, scholing en evaluatiegegevens.", "Beheer, implementatie, evaluatie, feedback verzamelen en randvoorwaarden bewaken."],
+      ["ICT-leverancier/beheerder", "Technische eisen, koppelingen, autorisaties, logging en beveiliging.", "Rolgebaseerde toegang, logging, storingen, gegevensbeveiliging en systeembeheer."]
+    ];
+
+    let currentUser = null;
+    let currentTab = "overzicht";
+    let currentDiscipline = "huisarts";
+
+    let messages = [
+      ["Huisarts", "Longzorg", "Patiënt meldt toename dyspnoe en vermoeidheid. Graag beoordeling."],
+      ["Longzorg", "Huisarts", "Advies: controle saturatie en herbeoordeling medicatie."]
+    ];
+
+    let tasks = [
+      ["Longzorg", "Beoordeel lage saturatie", "Urgent", false],
+      ["Diëtiek", "Plan intake wegens gewichtsverlies", "Hoog", false],
+      ["Fysiotherapie", "Herbeoordeel inspanningstolerantie", "Middel", false]
+    ];
+
+    let ideas = [
+      "Maak COPD-alerts direct zichtbaar bovenaan het dashboard.",
+      "Voeg vanuit iedere alert direct een taakknop toe."
+    ];
+
+    const loginPage = document.getElementById("loginPage");
+    const app = document.getElementById("app");
+    const loginForm = document.getElementById("loginForm");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const roleSelect = document.getElementById("roleSelect");
+    const loginError = document.getElementById("loginError");
+    const remember = document.getElementById("remember");
+    const mainPanel = document.getElementById("mainPanel");
+    const sideRole = document.getElementById("sideRole");
+    const sideAccess = document.getElementById("sideAccess");
+    const loginStatus = document.getElementById("loginStatus");
+    const disciplineSelect = document.getElementById("disciplineSelect");
+    const disciplineLabel = document.getElementById("disciplineLabel");
+
+    loginForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      const selected = roleSelect.value;
+      const typed = usernameInput.value.trim().toLowerCase();
+      const username = typed || selected;
+      const password = passwordInput.value;
+
+      const found = users[username];
+
+      if (!found || found.password !== password) {
+        loginError.style.display = "block";
+        return;
+      }
+
+      if (remember.checked) {
+        localStorage.setItem("kisUser", username);
+      }
+
+      startApp(username);
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", function() {
+      localStorage.removeItem("kisUser");
+      currentUser = null;
+      app.style.display = "none";
+      loginPage.style.display = "flex";
+    });
+
+    document.querySelectorAll(".sidebar button[data-tab]").forEach(btn => {
+      btn.addEventListener("click", function() {
+        currentTab = this.dataset.tab;
+        render();
+      });
+    });
+
+    disciplineSelect.addEventListener("change", function() {
+      currentDiscipline = this.value;
+      render();
+    });
+
+    const savedUser = localStorage.getItem("kisUser");
+    if (savedUser && users[savedUser]) {
+      startApp(savedUser);
+    }
+
+    function startApp(username) {
+      currentUser = { username, ...users[username] };
+      currentDiscipline = currentUser.discipline;
+      currentTab = "overzicht";
+
+      loginError.style.display = "none";
+      loginPage.style.display = "none";
+      app.style.display = "flex";
+
+      renderDisciplineOptions();
+      render();
+    }
+
+    function renderDisciplineOptions() {
+      disciplineSelect.innerHTML = "";
+
+      Object.entries(disciplines).forEach(([key, discipline]) => {
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = discipline.label;
+        disciplineSelect.appendChild(option);
+      });
+
+      if (currentUser.username === "huisarts") {
+        disciplineSelect.style.display = "block";
+        disciplineLabel.style.display = "block";
+      } else {
+        disciplineSelect.style.display = "none";
+        disciplineLabel.style.display = "none";
+      }
+    }
+
+    function render() {
+      sideRole.textContent = currentUser.role;
+      sideAccess.textContent = currentUser.access;
+      loginStatus.innerHTML = `${currentUser.name} — <strong>${currentUser.role}</strong>`;
+
+      document.querySelectorAll(".sidebar button[data-tab]").forEach(btn => {
+        const tab = btn.dataset.tab;
+        btn.style.display = currentUser.tabs.includes(tab) ? "block" : "none";
+        btn.classList.toggle("active", tab === currentTab);
+      });
+
+      if (!currentUser.tabs.includes(currentTab)) {
+        currentTab = "overzicht";
+      }
+
+      if (currentUser.username !== "huisarts") {
+        currentDiscipline = currentUser.discipline;
+      }
+
+      disciplineSelect.value = currentDiscipline;
+
+      if (currentTab === "overzicht") renderOverview();
+      if (currentTab === "gordon") renderGordon();
+      if (currentTab === "geschiedenis") renderHistory();
+      if (currentTab === "communicatie") renderCommunication();
+      if (currentTab === "taken") renderTasks();
+      if (currentTab === "ideeen") renderIdeas();
+      if (currentTab === "wetgeving") renderLaws();
+      if (currentTab === "behoeften") renderNeeds();
+    }
+
+    function panel(title, content) {
+      mainPanel.innerHTML = `
+        <section class="panel">
+          <h2>${title}</h2>
+          ${content}
+        </section>
+      `;
+    }
+
+    function renderOverview() {
+      const d = disciplines[currentDiscipline];
+      const cards = d.cards.map(([title, value]) => `
+        <article class="tile">
+          <h3>${title}</h3>
+          <p>${value}</p>
+        </article>
+      `).join("");
+
+      panel(`Discipline-specifiek overzicht — ${d.label}`, `
+        <p class="muted">${d.role}</p>
+        <div class="grid">${cards}</div>
+        <div class="demo-box">
+          <strong>Demo privacy:</strong><br />
+          In een echte implementatie horen autorisatie per discipline, logging, minimale gegevensweergave en AVG/NEN 7510-borging te worden ingericht.
+        </div>
+      `);
+    }
+
+    function renderGordon() {
+      const rows = gordon.map(([title, text]) => `
+        <div class="row">
+          <strong>${title}</strong>
+          <span>${text}</span>
+        </div>
+      `).join("");
+
+      panel("Gordon-opzet", `
+        <p class="muted">De 11 leefpatronen van Gordon geven een herkenbare structuur voor zorgbehoeften.</p>
+        <div class="list">${rows}</div>
+      `);
+    }
+
+    function renderHistory() {
+      const d = disciplines[currentDiscipline];
+      const rows = d.history.map(item => `<div class="row">${item}</div>`).join("");
+
+      panel(`Medische geschiedenis — ${d.label}`, `
+        <div class="list">${rows}</div>
+      `);
+    }
+
+    function renderCommunication() {
+      const rows = messages.map(([from, to, text]) => `
+        <div class="message">
+          <strong>${from} → ${to}</strong>
+          <p>${text}</p>
+        </div>
+      `).join("");
+
+      panel("Communicatie en overdracht", `
+        <textarea id="messageInput" placeholder="Typ hier een bericht of overdracht naar een andere discipline..."></textarea>
+        <button onclick="addMessage()">Bericht toevoegen</button>
+        <div class="list">${rows}</div>
+      `);
+    }
+
+    function addMessage() {
+      const input = document.getElementById("messageInput");
+      const text = input.value.trim();
+      if (!text) return;
+      messages.unshift([currentUser.role, "Zorgteam", text]);
+      renderCommunication();
+    }
+
+    function renderTasks() {
+      const rows = tasks.map(([owner, text, priority, done], index) => `
+        <div class="task">
+          <div>
+            <strong style="${done ? 'text-decoration: line-through; color:#94a3b8;' : ''}">${text}</strong>
+            <p>${owner} · Prioriteit: ${priority}</p>
+          </div>
+          <button onclick="toggleTask(${index})">${done ? "Heropenen" : "Afronden"}</button>
+        </div>
+      `).join("");
+
+      panel("Taken toewijzen", `
+        <textarea id="taskInput" placeholder="Typ een nieuwe taak..."></textarea>
+        <button onclick="addTask()">Taak toevoegen</button>
+        <div class="list">${rows}</div>
+      `);
+    }
+
+    function addTask() {
+      const input = document.getElementById("taskInput");
+      const text = input.value.trim();
+      if (!text) return;
+      tasks.unshift(["Zorgteam", text, "Middel", false]);
+      renderTasks();
+    }
+
+    function toggleTask(index) {
+      tasks[index][3] = !tasks[index][3];
+      renderTasks();
+    }
+
+    function renderIdeas() {
+      const rows = ideas.map(idea => `<div class="row">${idea}</div>`).join("");
+
+      panel("Ideeënbox", `
+        <textarea id="ideaInput" placeholder="Typ hier een verbeteridee..."></textarea>
+        <button onclick="addIdea()">Verbeteridee toevoegen</button>
+        <div class="list">${rows}</div>
+      `);
+    }
+
+    function addIdea() {
+      const input = document.getElementById("ideaInput");
+      const text = input.value.trim();
+      if (!text) return;
+      ideas.unshift(text);
+      renderIdeas();
+    }
+
+    function renderLaws() {
+      const rows = laws.map(([aspect, meaning, application]) => `
+        <tr>
+          <td><strong>${aspect}</strong></td>
+          <td>${meaning}</td>
+          <td>${application}</td>
+        </tr>
+      `).join("");
+
+      panel("Wetgeving, normen en standaarden", `
+        <p class="muted">
+          Dit onderdeel maakt zichtbaar hoe privacy, informatiebeveiliging, logging en gegevensuitwisseling zijn meegenomen in het ontwerp.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Betekenis voor het dashboard</th>
+              <th>Toepassing in de interface</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `);
+    }
+
+    function renderNeeds() {
+      const rows = needs.map(([stakeholder, info, instruction]) => `
+        <tr>
+          <td><strong>${stakeholder}</strong></td>
+          <td>${info}</td>
+          <td>${instruction}</td>
+        </tr>
+      `).join("");
+
+      panel("Informatiebehoefte en instructiebehoefte per stakeholder", `
+        <table>
+          <thead>
+            <tr>
+              <th>Stakeholder</th>
+              <th>Informatiebehoefte</th>
+              <th>Instructiebehoefte</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `);
+    }
+  </script>
+</body>
+</html>
