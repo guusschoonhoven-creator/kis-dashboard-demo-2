@@ -806,6 +806,26 @@
       `);
     }
 
+    function getRecipientOptions(selectedValue = "") {
+      const recipients = [
+        "Huisarts",
+        "Longarts",
+        "Longzorg",
+        "Fysiotherapie",
+        "Diëtiek",
+        "Psychologie",
+        "Praktijkondersteuner",
+        "Verpleegkundig specialist",
+        "Apotheker",
+        "Afdelingshoofd",
+        "ICT-beheerder"
+      ];
+
+      return recipients.map(recipient => `
+        <option value="${recipient}" ${recipient === selectedValue ? "selected" : ""}>${recipient}</option>
+      `).join("");
+    }
+
     function renderCommunication() {
       const rows = messages.map(([from, to, text]) => `
         <div class="message">
@@ -815,7 +835,12 @@
       `).join("");
 
       panel("Communicatie en overdracht", `
-        <textarea id="messageInput" placeholder="Typ hier een bericht of overdracht naar een andere discipline..."></textarea>
+        <label for="messageReceiver">Bericht sturen naar discipline/zorgverlener</label>
+        <select id="messageReceiver">
+          ${getRecipientOptions()}
+        </select>
+
+        <textarea id="messageInput" placeholder="Typ hier een bericht of overdracht naar de gekozen discipline..."></textarea>
         <button onclick="addMessage()">Bericht toevoegen</button>
         <div class="list">${rows}</div>
       `);
@@ -823,9 +848,13 @@
 
     function addMessage() {
       const input = document.getElementById("messageInput");
+      const receiver = document.getElementById("messageReceiver");
       const text = input.value.trim();
-      if (!text) return;
-      messages.unshift([currentUser.role, "Zorgteam", text]);
+      const to = receiver.value;
+
+      if (!text || !to) return;
+
+      messages.unshift([currentUser.role, to, text]);
       renderCommunication();
     }
 
@@ -834,14 +863,27 @@
         <div class="task">
           <div>
             <strong style="${done ? 'text-decoration: line-through; color:#94a3b8;' : ''}">${text}</strong>
-            <p>${owner} · Prioriteit: ${priority}</p>
+            <p>Toegewezen aan: ${owner} · Prioriteit: ${priority}</p>
           </div>
           <button onclick="toggleTask(${index})">${done ? "Heropenen" : "Afronden"}</button>
         </div>
       `).join("");
 
       panel("Taken toewijzen", `
-        <textarea id="taskInput" placeholder="Typ een nieuwe taak..."></textarea>
+        <label for="taskOwner">Taak toewijzen aan zorgverlener</label>
+        <select id="taskOwner">
+          ${getRecipientOptions()}
+        </select>
+
+        <label for="taskPriority">Prioriteit</label>
+        <select id="taskPriority">
+          <option value="Laag">Laag</option>
+          <option value="Middel" selected>Middel</option>
+          <option value="Hoog">Hoog</option>
+          <option value="Urgent">Urgent</option>
+        </select>
+
+        <textarea id="taskInput" placeholder="Typ een nieuwe taak voor de gekozen zorgverlener..."></textarea>
         <button onclick="addTask()">Taak toevoegen</button>
         <div class="list">${rows}</div>
       `);
@@ -849,9 +891,13 @@
 
     function addTask() {
       const input = document.getElementById("taskInput");
+      const owner = document.getElementById("taskOwner");
+      const priority = document.getElementById("taskPriority");
       const text = input.value.trim();
-      if (!text) return;
-      tasks.unshift(["Zorgteam", text, "Middel", false]);
+
+      if (!text || !owner.value) return;
+
+      tasks.unshift([owner.value, text, priority.value, false]);
       renderTasks();
     }
 
