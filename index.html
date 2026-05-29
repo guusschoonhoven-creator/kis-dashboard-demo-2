@@ -431,6 +431,8 @@
         role: "Huisarts",
         access: "Brede inzage en huisarts-interface",
         discipline: "huisarts",
+        taskOwner: "Huisarts",
+        canAssignTasks: true,
         tabs: ["overzicht", "gordon", "geschiedenis", "communicatie", "taken", "ideeen", "wetgeving", "behoeften"]
       },
       longarts: {
@@ -439,6 +441,8 @@
         role: "Longarts",
         access: "Brede inzage en longarts-interface",
         discipline: "longzorg",
+        taskOwner: "Longarts",
+        canAssignTasks: true,
         tabs: ["overzicht", "gordon", "geschiedenis", "communicatie", "taken", "ideeen", "wetgeving", "behoeften"]
       },
       longzorg: {
@@ -447,7 +451,9 @@
         role: "Longzorg",
         access: "Disciplinegebonden toegang",
         discipline: "longzorg",
-        tabs: ["overzicht", "geschiedenis", "communicatie", "wetgeving"]
+        taskOwner: "Longzorg",
+        canAssignTasks: false,
+        tabs: ["overzicht", "geschiedenis", "communicatie", "taken", "wetgeving"]
       },
       fysiotherapie: {
         password: "demo123",
@@ -455,15 +461,19 @@
         role: "Fysiotherapie",
         access: "Disciplinegebonden toegang",
         discipline: "fysiotherapie",
-        tabs: ["overzicht", "geschiedenis", "communicatie", "wetgeving"]
+        taskOwner: "Fysiotherapie",
+        canAssignTasks: false,
+        tabs: ["overzicht", "geschiedenis", "communicatie", "taken", "wetgeving"]
       },
-      dietiek: {
+      dietetiek: {
         password: "demo123",
-        name: "Diëtiek",
-        role: "Diëtiek",
+        name: "Diëtetiek",
+        role: "Diëtetiek",
         access: "Disciplinegebonden toegang",
         discipline: "dietetiek",
-        tabs: ["overzicht", "geschiedenis", "communicatie", "wetgeving"]
+        taskOwner: "Diëtetiek",
+        canAssignTasks: false,
+        tabs: ["overzicht", "geschiedenis", "communicatie", "taken", "wetgeving"]
       },
       psychologie: {
         password: "demo123",
@@ -471,7 +481,9 @@
         role: "Psychologie",
         access: "Disciplinegebonden toegang",
         discipline: "psychologie",
-        tabs: ["overzicht", "geschiedenis", "communicatie", "wetgeving"]
+        taskOwner: "Psychologie",
+        canAssignTasks: false,
+        tabs: ["overzicht", "geschiedenis", "communicatie", "taken", "wetgeving"]
       }
     };
 
@@ -522,7 +534,7 @@
         ]
       },
       dietetiek: {
-        label: "Diëtiek",
+        label: "Diëtetiek",
         role: "Voedingstoestand en gewichtsverlies",
         cards: [
           ["Gewicht", "71 kg"],
@@ -598,8 +610,11 @@
 
     let tasks = [
       ["Longzorg", "Beoordeel lage saturatie", "Urgent", false],
-      ["Diëtiek", "Plan intake wegens gewichtsverlies", "Hoog", false],
-      ["Fysiotherapie", "Herbeoordeel inspanningstolerantie", "Middel", false]
+      ["Diëtetiek", "Plan intake wegens gewichtsverlies", "Hoog", false],
+      ["Fysiotherapie", "Herbeoordeel inspanningstolerantie", "Middel", false],
+      ["Huisarts", "Controleer follow-up na exacerbatie", "Hoog", false],
+      ["Longarts", "Beoordeel longfunctiegegevens en behandeladvies", "Urgent", false],
+      ["Psychologie", "Bespreek angst bij benauwdheid", "Middel", false]
     ];
 
     let ideas = [
@@ -812,7 +827,7 @@
         "Longarts",
         "Longzorg",
         "Fysiotherapie",
-        "Diëtiek",
+        "Diëtetiek",
         "Psychologie",
         "Praktijkondersteuner",
         "Verpleegkundig specialist",
@@ -859,32 +874,68 @@
     }
 
     function renderTasks() {
-      const rows = tasks.map(([owner, text, priority, done], index) => `
-        <div class="task">
-          <div>
-            <strong style="${done ? 'text-decoration: line-through; color:#94a3b8;' : ''}">${text}</strong>
-            <p>Toegewezen aan: ${owner} · Prioriteit: ${priority}</p>
+      const currentOwner = currentUser.taskOwner;
+
+      const visibleTasks = tasks
+        .map((task, index) => ({ task, index }))
+        .filter(item => item.task[0] === currentOwner);
+
+      const rows = visibleTasks.length > 0
+        ? visibleTasks.map(({ task, index }) => {
+            const [owner, text, priority, done] = task;
+            return `
+              <div class="task">
+                <div>
+                  <strong style="${done ? 'text-decoration: line-through; color:#94a3b8;' : ''}">${text}</strong>
+                  <p>Toegewezen aan: ${owner} · Prioriteit: ${priority}</p>
+                </div>
+                <button onclick="toggleTask(${index})">${done ? "Heropenen" : "Afronden"}</button>
+              </div>
+            `;
+          }).join("")
+        : `
+          <div class="row">
+            Er zijn op dit moment geen taken toegewezen aan ${currentOwner}.
           </div>
-          <button onclick="toggleTask(${index})">${done ? "Heropenen" : "Afronden"}</button>
-        </div>
-      `).join("");
+        `;
 
-      panel("Taken toewijzen", `
-        <label for="taskOwner">Taak toewijzen aan zorgverlener</label>
-        <select id="taskOwner">
-          ${getRecipientOptions()}
-        </select>
+      let assignBlock = "";
 
-        <label for="taskPriority">Prioriteit</label>
-        <select id="taskPriority">
-          <option value="Laag">Laag</option>
-          <option value="Middel" selected>Middel</option>
-          <option value="Hoog">Hoog</option>
-          <option value="Urgent">Urgent</option>
-        </select>
+      if (currentUser.canAssignTasks) {
+        assignBlock = `
+          <div class="demo-box">
+            <strong>Taak toewijzen</strong><br />
+            Als ${currentUser.role} kun je in deze demo taken toewijzen aan andere zorgverleners.
+          </div>
 
-        <textarea id="taskInput" placeholder="Typ een nieuwe taak voor de gekozen zorgverlener..."></textarea>
-        <button onclick="addTask()">Taak toevoegen</button>
+          <label for="taskOwner">Taak toewijzen aan zorgverlener</label>
+          <select id="taskOwner">
+            ${getRecipientOptions()}
+          </select>
+
+          <label for="taskPriority">Prioriteit</label>
+          <select id="taskPriority">
+            <option value="Laag">Laag</option>
+            <option value="Middel" selected>Middel</option>
+            <option value="Hoog">Hoog</option>
+            <option value="Urgent">Urgent</option>
+          </select>
+
+          <textarea id="taskInput" placeholder="Typ een nieuwe taak voor de gekozen zorgverlener..."></textarea>
+          <button onclick="addTask()">Taak toevoegen</button>
+        `;
+      } else {
+        assignBlock = `
+          <div class="demo-box">
+            <strong>Mijn taken</strong><br />
+            Je ziet hier alleen de taken die aan jouw discipline zijn toegewezen. Je kunt deze taken afvinken wanneer ze zijn uitgevoerd.
+          </div>
+        `;
+      }
+
+      panel(`Taken — ${currentOwner}`, `
+        ${assignBlock}
+        <h3 style="margin-top: 24px;">Mijn toegewezen taken</h3>
         <div class="list">${rows}</div>
       `);
     }
@@ -893,6 +944,9 @@
       const input = document.getElementById("taskInput");
       const owner = document.getElementById("taskOwner");
       const priority = document.getElementById("taskPriority");
+
+      if (!input || !owner || !priority) return;
+
       const text = input.value.trim();
 
       if (!text || !owner.value) return;
