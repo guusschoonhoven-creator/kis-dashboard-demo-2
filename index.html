@@ -6,6 +6,7 @@
   <title>KIS-Dashboard COPD-Ketenzorg</title>
   <style>
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -330,7 +331,7 @@
       <div class="logo">KIS</div>
       <h1>KIS-Dashboard<br />COPD-Ketenzorg</h1>
       <p class="muted">
-        Log in als stakeholder. De huisarts is één van de stakeholders, maar heeft in deze demo bredere inzage en meer functies dan de overige disciplines.
+        Log in als stakeholder. De huisarts en longarts hebben in deze demo brede inzage, maar krijgen allebei een eigen interface die past bij hun rol in de COPD-ketenzorg.
       </p>
 
       <form id="loginForm">
@@ -339,7 +340,8 @@
 
         <label>Stakeholderrol</label>
         <select id="roleSelect">
-          <option value="huisarts">Huisarts — brede inzage en extra functies</option>
+          <option value="huisarts">Huisarts — brede inzage en eigen interface</option>
+          <option value="longarts">Longarts — brede inzage en eigen interface</option>
           <option value="longzorg">Longzorg — disciplinegebonden toegang</option>
           <option value="fysiotherapie">Fysiotherapie — disciplinegebonden toegang</option>
           <option value="dietetiek">Diëtetiek — disciplinegebonden toegang</option>
@@ -364,7 +366,8 @@
 
       <div class="demo-box">
         <strong>Demo-logins:</strong><br />
-        huisarts — brede inzage en extra functies<br />
+        huisarts — brede inzage en huisarts-interface<br />
+        longarts — brede inzage en longarts-interface<br />
         longzorg, fysiotherapie, dietetiek, psychologie — disciplinegebonden toegang<br />
         Wachtwoord: demo123<br /><br />
         <strong>Tip:</strong> laat het veld gebruikersnaam leeg en kies een stakeholderrol om het verschil goed te testen.
@@ -426,8 +429,16 @@
         password: "demo123",
         name: "Dr. J. Visser",
         role: "Huisarts",
-        access: "Brede inzage en extra functies",
+        access: "Brede inzage en huisarts-interface",
         discipline: "huisarts",
+        tabs: ["overzicht", "gordon", "geschiedenis", "communicatie", "taken", "ideeen", "wetgeving", "behoeften"]
+      },
+      longarts: {
+        password: "demo123",
+        name: "Dr. L. de Vries",
+        role: "Longarts",
+        access: "Brede inzage en longarts-interface",
+        discipline: "longzorg",
         tabs: ["overzicht", "gordon", "geschiedenis", "communicatie", "taken", "ideeen", "wetgeving", "behoeften"]
       },
       longzorg: {
@@ -447,13 +458,13 @@
         tabs: ["overzicht", "geschiedenis", "communicatie", "wetgeving"]
       },
       dietiek: {
-  password: "demo123",
-  name: "Diëtiek",
-  role: "Diëtiek",
-  access: "Disciplinegebonden toegang",
-  discipline: "dietetiek",
-  tabs: ["overzicht", "geschiedenis", "communicatie", "wetgeving"]
-},
+        password: "demo123",
+        name: "Diëtiek",
+        role: "Diëtiek",
+        access: "Disciplinegebonden toegang",
+        discipline: "dietetiek",
+        tabs: ["overzicht", "geschiedenis", "communicatie", "wetgeving"]
+      },
       psychologie: {
         password: "demo123",
         name: "Psychologie",
@@ -510,7 +521,7 @@
           "Voortgang: 210 meter — 12 mei 2025"
         ]
       },
-      dietiek: {
+      dietetiek: {
         label: "Diëtiek",
         role: "Voedingstoestand en gewichtsverlies",
         cards: [
@@ -613,6 +624,7 @@
 
     loginForm.addEventListener("submit", function(e) {
       e.preventDefault();
+
       const selected = roleSelect.value;
       const typed = usernameInput.value.trim().toLowerCase();
       const username = typed || selected;
@@ -679,7 +691,7 @@
         disciplineSelect.appendChild(option);
       });
 
-      if (currentUser.username === "huisarts") {
+      if (currentUser.username === "huisarts" || currentUser.username === "longarts") {
         disciplineSelect.style.display = "block";
         disciplineLabel.style.display = "block";
       } else {
@@ -703,7 +715,7 @@
         currentTab = "overzicht";
       }
 
-      if (currentUser.username !== "huisarts") {
+      if (currentUser.username !== "huisarts" && currentUser.username !== "longarts") {
         currentDiscipline = currentUser.discipline;
       }
 
@@ -730,6 +742,29 @@
 
     function renderOverview() {
       const d = disciplines[currentDiscipline];
+
+      let roleExplanation = "";
+
+      if (currentUser.username === "huisarts") {
+        roleExplanation = `
+          <div class="demo-box">
+            <strong>Huisarts-interface:</strong><br />
+            De huisarts heeft brede inzage om de follow-up, terugkoppeling vanuit de keten en signalen van verslechtering te kunnen overzien.
+            De huisarts start standaard bij de eerstelijnsinformatie, maar kan in deze demo ook andere disciplines bekijken.
+          </div>
+        `;
+      }
+
+      if (currentUser.username === "longarts") {
+        roleExplanation = `
+          <div class="demo-box">
+            <strong>Longarts-interface:</strong><br />
+            De longarts heeft brede inzage om diagnostiek, longfunctiegegevens, GOLD-classificatie, specialistisch behandeladvies en overdracht vanuit de keten te kunnen beoordelen.
+            De longarts start standaard bij de longzorginformatie, maar kan in deze demo ook andere disciplines bekijken.
+          </div>
+        `;
+      }
+
       const cards = d.cards.map(([title, value]) => `
         <article class="tile">
           <h3>${title}</h3>
@@ -738,6 +773,7 @@
       `).join("");
 
       panel(`Discipline-specifiek overzicht — ${d.label}`, `
+        ${roleExplanation}
         <p class="muted">${d.role}</p>
         <div class="grid">${cards}</div>
         <div class="demo-box">
